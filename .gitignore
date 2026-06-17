@@ -1,0 +1,32 @@
+# Secrets — never commit
+.env
+.env.local
+.env.*.local
+*.key
+
+# Dependencies
+node_modules/
+.npm
+
+# Build output
+dist/
+client/dist/
+server/dist/
+*.tsbuildinfo
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Local Claude Code settings (not shared)
+.claude/settings.local.json
+
+# Misc
+coverage/
+.cache/

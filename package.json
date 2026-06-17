@@ -1,0 +1,29 @@
+{
+  "name": "discharge-instructions",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Educational app for teaching medical students to write patient discharge instructions. Sponsored by Northwestern University Feinberg School of Medicine.",
+  "engines": {
+    "node": ">=20"
+  },
+  "workspaces": [
+    "shared",
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "dev": "concurrently -n client,server -c magenta,cyan \"npm:dev:client\" \"npm:dev:server\"",
+    "dev:client": "npm run dev --workspace client",
+    "dev:server": "npm run dev --workspace server",
+    "build": "npm run build --workspace client",
+    "start": "npm run start --workspace server",
+    "typecheck": "npm run typecheck --workspace client && npm run typecheck --workspace server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "overrides": {
+    "shell-quote": "^1.8.4"
+  }
+}
