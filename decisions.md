@@ -43,10 +43,14 @@ the login and upload screens.
 doesn't persist, and Class Statistics shows an empty state.
 **Rationale:** Frictionless local dev without Postgres; resilient if the DB is briefly unavailable.
 
-## 2026-06-17 · Single Railway service + Nixpacks
-**Decision:** Express serves `client/dist` and `/api`; `nixpacks.toml` pins Node 20 and runs
-`npm ci` → `npm run build` → `npm start`. Server runs via `tsx` (no separate compile step).
-**Rationale:** Simplest deploy; one service + a Postgres plugin.
+## 2026-06-17 · Single Railway service + Railpack
+**Decision:** Express serves `client/dist` and `/api`. Railway's default **Railpack** builder
+(Nixpacks is deprecated) auto-runs the root `build` script (builds client) and `start` script
+(starts the server via `tsx`); `railpack.json` pins Node 20 and `startCommand: npm start`.
+**Rationale:** Simplest deploy; one service + a Postgres plugin. Two gotchas learned during setup:
+(1) Railway auto-splits npm workspaces into per-workspace services — must keep one service rooted
+at the repo root. (2) `tsx` was moved from devDependencies to dependencies so it survives
+production devDependency pruning in the deploy image.
 
 ## 2026-06-17 · Accepted dev-only npm advisory
 **Context:** `npm audit` flags `esbuild <=0.24.2` via Vite (dev server can be probed by a website).

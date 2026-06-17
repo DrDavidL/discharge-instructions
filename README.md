@@ -67,9 +67,17 @@ Other scripts: `npm run typecheck`, `npm run build`, `npm start` (production: se
 
 ## Deploying to Railway
 
+This app is **one service** — the Express server serves the built React SPA *and* the `/api`.
+Railway's default **Railpack** builder runs the root `build` script (which builds the client) and
+the root `start` script (which starts the server), and supports npm workspaces natively.
+
 1. **Push this repo to GitHub** (public is fine — no secrets are committed).
-2. In Railway: **New Project → Deploy from GitHub repo** and select this repo. Railway uses the
-   included `nixpacks.toml` to build (`npm ci` → `npm run build`) and start (`npm start`).
+2. In Railway: **New Project → Deploy from GitHub repo** and select this repo.
+   - ⚠️ **Monorepo note:** Railway may auto-detect the npm workspaces and create *one service per
+     workspace* (`@dci/client`, `@dci/server`). You only want **one** app service. Delete the
+     extra one and, on the service you keep, set **Settings → Root Directory** to the **repo root**
+     (blank / `/`) so Railpack builds the client *and* runs the server. Keep the builder on
+     **Railpack** (the included `railpack.json` pins Node 20 and `startCommand: npm start`).
 3. **Add a database:** in the project, **New → Database → PostgreSQL**. This creates a Postgres
    service exposing `DATABASE_URL`.
 4. **Reference the database** from the app service: in the app service **Variables**, add
