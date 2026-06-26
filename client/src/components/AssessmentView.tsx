@@ -1,4 +1,5 @@
 import type { ScoreResponse } from "@dci/shared";
+import { CaseViewer } from "./CaseViewer";
 
 interface Props {
   result: ScoreResponse;
@@ -10,6 +11,15 @@ function fillClass(percent: number): string {
   if (percent >= 83) return "good";
   if (percent >= 58) return "mid";
   return "low";
+}
+
+function gradeLabel(grade: number): string {
+  const g = Math.round(grade);
+  if (g <= 0) return "Kindergarten level";
+  if (g >= 16) return "Graduate level";
+  if (g >= 13) return "College level";
+  const suffix = g === 1 ? "st" : g === 2 ? "nd" : g === 3 ? "rd" : "th";
+  return `${g}${suffix}-grade reading level`;
 }
 
 export function AssessmentView({ result, onRevise, onRestart }: Props) {
@@ -35,6 +45,13 @@ export function AssessmentView({ result, onRevise, onRestart }: Props) {
         <div className="score-hero-text">
           <span className={`band-pill band-${band}`}>{a.band}</span>
           {a.summary && <p>{a.summary}</p>}
+          {a.readability && (
+            <p className="readability">
+              📖 <strong>{gradeLabel(a.readability.fleschKincaidGrade)}</strong>{" "}
+              (Flesch–Kincaid grade {a.readability.fleschKincaidGrade}; reading ease{" "}
+              {a.readability.fleschReadingEase}/100). Aim for a 6th–7th grade level for patients.
+            </p>
+          )}
         </div>
       </div>
 
@@ -95,6 +112,17 @@ export function AssessmentView({ result, onRevise, onRestart }: Props) {
           </div>
         ))}
       </div>
+
+      {result.exemplar && (
+        <details className="card exemplar">
+          <summary>Compare with a gold-standard example</summary>
+          <p className="muted small">
+            One faculty-approved way to write these instructions. Yours need not match it word for
+            word — many valid versions exist.
+          </p>
+          <CaseViewer content={result.exemplar} />
+        </details>
+      )}
 
       <div className="workspace-actions">
         <button className="btn btn-ghost" onClick={onRevise}>

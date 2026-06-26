@@ -54,6 +54,16 @@ export interface CategoryScore {
 
 export type PerformanceBand = "Optimal" | "Adequate" | "Inadequate";
 
+/** Deterministic readability metrics computed server-side from the student's draft. */
+export interface Readability {
+  /** Flesch–Kincaid grade level (U.S. school grade). */
+  fleschKincaidGrade: number;
+  /** Flesch reading ease (0–100; higher is easier). */
+  fleschReadingEase: number;
+  wordCount: number;
+  sentenceCount: number;
+}
+
 export interface Assessment {
   overallScore: number;
   maxScore: number;
@@ -64,6 +74,8 @@ export interface Assessment {
   criteria: CriterionScore[];
   topPriorities: string[];
   safetyFlags: string[];
+  /** Computed reading level of the draft; null if the draft had no scoreable text. */
+  readability: Readability | null;
 }
 
 export interface ScoreRequest {
@@ -83,6 +95,11 @@ export interface ScoreResponse {
   persisted: boolean;
   model: string;
   assessment: Assessment;
+  /**
+   * Gold-standard example instructions for the chosen built-in case, revealed to the
+   * student on the assessment screen for comparison. Null for uploaded cases.
+   */
+  exemplar: string | null;
 }
 
 // ---- Stats ----

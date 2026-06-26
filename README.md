@@ -10,18 +10,39 @@ from an LLM. Built for and **sponsored by Northwestern University Feinberg Schoo
 
 ## How it works
 
-1. **Choose a case** — pick one of three simulated discharge summaries, or paste/upload your own
+1. **Choose a case** — pick one of the simulated discharge summaries, or paste/upload your own
    *simulated* document (with a no-PHI warning).
-2. **Draft your discharge instructions** — the source summary shows on the left; you fill in an
-   outline of section headers on the right.
-3. **Assess** — your draft is scored against a comprehensive rubric. The draft and the full
-   assessment are saved to the class database, and the assessment is shown to you immediately.
+2. **Draft your discharge instructions** — the source summary shows on the left; you write the
+   complete instructions on the right in a **single blank text box**. There are no section
+   prompts — deciding which sections to include is part of the exercise.
+3. **Assess** — your draft is scored against a comprehensive rubric, with a server-computed
+   **reading-level estimate** (see below). The draft and the full assessment are saved to the
+   class database, and the assessment is shown to you immediately. For built-in cases, a
+   **gold-standard example** can be revealed for comparison after scoring.
 
 A separate, always-available **Class Statistics** tab shows average category scores across all
 submissions (independent of the 3-step flow).
 
 The rubric (`scoring.md`) and the student outline (`features.md`) are plain Markdown and are the
 **single source of truth** — faculty can edit them without touching code.
+
+## Reading-level assessment (deterministic)
+
+The reading grade level is **computed by the server, not the LLM**, so it is reproducible: the
+same draft always yields the same number. The implementation (`server/src/readability.ts`) is
+dependency-free and applies the standard readability formulas to the student's submitted text:
+
+- **Flesch–Kincaid Grade Level** = `0.39 × (words ÷ sentences) + 11.8 × (syllables ÷ words) − 15.59`
+  — the headline metric, reported as a U.S. school grade (target ≈ 6th–7th grade for patient material).
+- **Flesch Reading Ease** = `206.835 − 1.015 × (words ÷ sentences) − 84.6 × (syllables ÷ words)`
+  — a 0–100 companion score (higher is easier), clamped to that range for display.
+
+Before counting, the text is lightly de-marked-down (headings, list bullets, emphasis, links, code
+removed). Words are matched on letter runs; sentences on `.`/`!`/`?` terminators (minimum 1 so a
+single line still scores); syllables are estimated with a vowel-group heuristic (silent trailing
+`e` dropped, minimum 1 per word). This estimate is shown to the student **and** passed into the
+scoring prompt as the authoritative figure for the *Reading Level & Plain Language* criterion, so
+the LLM grades that criterion against a real number rather than guessing.
 
 ## Tech stack
 
@@ -105,10 +126,17 @@ No PHI is stored. Uploaded source summaries are not saved.
 
 ## For faculty: customizing content
 
-- **Cases:** edit `server/src/cases.ts` (keep them clearly simulated).
-- **Outline (what students fill in):** edit the `## Student Outline` section in `features.md`.
+- **Cases:** edit `server/src/cases.ts` (keep them clearly simulated). Each case may include an
+  optional `exemplar` (a gold-standard example revealed to students *after* scoring — withheld
+  from the `/cases` list so it can't be pre-read) and `scoringNotes` (case-specific grading
+  guidance sent to the LLM only).
+- **Outline (LLM/faculty reference):** edit the `## Student Outline` section in `features.md`.
+  Students no longer see these titles (they draft on a blank page), but the titles and guidance
+  are still sent to the LLM as "what good looks like." Keep the `## Student Outline` heading and
+  `### ` title format so the server keeps parsing the block.
 - **Rubric (how it's scored):** edit `scoring.md` — the criteria table and the anchors. Keep the
-  table header `| ID | Category | Criterion | Points |` and unique IDs.
+  table header `| ID | Category | Criterion | Points |` and unique IDs. Bands are percent-based,
+  so adding/removing criteria adjusts the totals automatically.
 
 Changes take effect on redeploy.
 

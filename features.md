@@ -1,10 +1,11 @@
 # Discharge Instructions — Document Spec & App Features
 
 > **Audience:** read by the assessment LLM **and** parsed by the server.
-> The **Student Outline** section below is parsed to build the right-hand editor: students see
-> only the `###` section **titles** (no examples), while the guidance under each title is sent to
-> the LLM as context and is available to faculty here. Edit titles/guidance freely; keep the
-> `## Student Outline` heading and the `### ` title format so parsing keeps working.
+> The **Student Outline** section below is **faculty/LLM reference only** — students now draft on a
+> blank page (a single free-text box, no section prompts), because part of the assessment is whether
+> they know which sections to include. The titles and guidance below are still sent to the LLM as
+> "what good looks like." Keep the `## Student Outline` heading and the `### ` title format so the
+> server keeps parsing this block.
 
 ## What students are writing
 
@@ -15,7 +16,8 @@ read it and know what happened, what to do, what to watch for, and who to call.
 
 ## Student Outline
 
-> Students see these section titles only. The bullet guidance is faculty/LLM reference, not shown in the editor.
+> Faculty/LLM reference only. Students are not shown these titles — they draft on a blank page, and
+> whether they include the right sections is part of what is assessed.
 
 ### Why You Were in the Hospital
 Plain-language reason for admission, the main and secondary diagnoses, and the key things that
@@ -46,9 +48,9 @@ and anticipated next steps.
 Exactly who to contact if worried — primary care, relevant specialists, an after-hours/nurse line,
 and the emergency department — with roles and how to reach them.
 
-### Your Questions and Understanding
-Invite the patient to ask questions and support confirming understanding ("tell me in your own
-words" / teach-back). Acknowledge interpreter or translated-materials needs when relevant.
+### Your Questions
+Invite the patient (or caregiver) to ask questions, in a respectful, supportive tone that speaks to
+their specific situation.
 
 ## Reference: hallmarks of excellent discharge instructions
 
@@ -63,18 +65,20 @@ who to call if worried (PCP, specialists, ED); scheduled appointments; pending l
 anticipated problems with recommended next steps.
 
 **Readability & communication** — 6th–7th grade reading level; minimal, defined jargon; structure
-and visual cues that aid recall; the patient's preferred language; and verified comprehension via
-teach-back/read-back.
+and visual cues that aid recall; a respectful, patient-centered tone that invites questions.
 
 ## App features
 
 - **Shared-password login.** One class password gates the app. No student identity or PHI is stored.
 - **Step 1 — Choose or upload a case.** Three built-in simulated discharge summaries, or paste/upload
   your own (with a no-PHI / simulated-content-only warning). The source displays on the left.
-- **Step 2 — Draft your discharge instructions.** The outline above appears on the right as empty
-  section fields to fill in.
-- **Step 3 — Assess.** The draft is scored by the LLM against `scoring.md`. The draft and full
-  assessment are saved to the database; the assessment is shown to the student.
+- **Step 2 — Draft your discharge instructions.** Students write on a **blank page** (a single
+  free-text box) — no section prompts — so the assessment can capture whether they know which
+  sections to include.
+- **Step 3 — Assess.** The draft is scored by the LLM against `scoring.md`, plus a server-computed
+  Flesch–Kincaid reading level. The draft and full assessment are saved to the database; the
+  assessment is shown to the student. For built-in cases, a **gold-standard example** can be
+  revealed for comparison after scoring.
 - **Class Statistics (independent tab).** Average category scores across all submissions, viewable
   any time without going through the steps.
 

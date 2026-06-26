@@ -40,11 +40,10 @@ tests), score **2** if the student correctly omitted it or stated none, and say 
 | 7 | Contingency Planning & Follow-Up | Follow-Up Care | 2 |
 | 8 | Readability, Formatting & Language | Reading Level & Plain Language | 2 |
 | 9 | Readability, Formatting & Language | Organization & Formatting | 2 |
-| 10 | Readability, Formatting & Language | Language Access | 2 |
-| 11 | Communication & Patient Engagement | Patient-Centeredness & Teach-Back | 2 |
-| 12 | Accuracy & Safety | Accuracy & Consistency with the Record | 2 |
+| 10 | Communication & Patient Engagement | Patient-Centeredness | 2 |
+| 11 | Accuracy & Safety | Accuracy & Consistency with the Record | 2 |
 
-**Maximum total: 24 points.**
+**Maximum total: 22 points.**
 
 ## Per-criterion anchors
 
@@ -93,9 +92,10 @@ specialist recommendations, and anticipated next steps.
 - 0: No follow-up plan.
 
 **8 — Reading Level & Plain Language.** Written around a 6th–7th grade level; medical jargon
-avoided or defined.
-- 2: Consistently plain; jargon explained.
-- 1: Mixed; some unexplained terms or long complex sentences.
+avoided or defined. A computed Flesch–Kincaid grade level for the draft is provided to you —
+use it as the authoritative reading-level measure and weigh it alongside jargon use.
+- 2: Consistently plain (≈ 6th–7th grade); jargon explained.
+- 1: Mixed; some unexplained terms or long complex sentences (grade level somewhat high).
 - 0: Dense clinical language a layperson could not follow.
 
 **9 — Organization & Formatting.** Clear headings, short sentences, and lists/structure that aid
@@ -104,20 +104,13 @@ recall (the kind of structure that supports pictograms/visual cues in a real han
 - 1: Some structure but uneven.
 - 0: Wall of text / disorganized.
 
-**10 — Language Access.** Instructions are clear and, when the case indicates a non-English or
-specific communication preference, the student acknowledges interpreter/translated-materials needs.
-- 2: Clear; addresses language/communication needs when the case calls for it.
-- 1: Clear but ignores a stated language need.
-- 0: Not understandable / ignores a critical communication barrier.
-
-**11 — Patient-Centeredness & Teach-Back.** Speaks to *this* patient's situation and social
-context, invites questions, and supports confirming understanding (teach-back / "tell me in your
-own words").
-- 2: Personalized, supportive tone; invites questions / teach-back.
+**10 — Patient-Centeredness.** Speaks to *this* patient's (or caregiver's) situation and social
+context, uses a respectful, supportive tone, and invites the patient to ask questions.
+- 2: Personalized, supportive tone; invites questions.
 - 1: Generic but respectful.
 - 0: Impersonal or not actionable for the patient.
 
-**12 — Accuracy & Consistency with the Record.** The instructions are factually consistent with
+**11 — Accuracy & Consistency with the Record.** The instructions are factually consistent with
 the provided discharge summary — no contradictions, invented details, or dangerous omissions.
 - 2: Faithful to the source; no contradictions or fabrications.
 - 1: Minor inconsistencies or omissions.
@@ -131,11 +124,11 @@ the provided discharge summary — no contradictions, invented details, or dange
 ## Aggregation and bands (computed by the server)
 
 - **Category score** = sum of its criteria; **category percent** = score ÷ category max.
-- **Overall score** = sum of all criteria (max 24); **percent** = overall ÷ 24.
+- **Overall score** = sum of all criteria (max 22); **percent** = overall ÷ 22.
 - **Performance band** (by percent, so it survives rubric edits):
-  - **Optimal** — ≥ 83% (≈ 20–24 / 24): safe, clear, ready to give a patient.
-  - **Adequate** — 58–82% (≈ 14–19 / 24): usable but needs targeted revision for safety/comprehension.
-  - **Inadequate** — < 58% (< 14 / 24): high risk of post-discharge harm or readmission; needs rewrite.
+  - **Optimal** — ≥ 83% (≈ 19–22 / 22): safe, clear, ready to give a patient.
+  - **Adequate** — 58–82% (≈ 13–18 / 22): usable but needs targeted revision for safety/comprehension.
+  - **Inadequate** — < 58% (< 13 / 22): high risk of post-discharge harm or readmission; needs rewrite.
 
 ## Required output (JSON only)
 

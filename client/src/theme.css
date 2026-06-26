@@ -457,11 +457,44 @@ p {
   resize: vertical;
   background: var(--surface);
 }
+.draft-input {
+  width: 100%;
+  min-height: 24rem;
+  font-family: inherit;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  resize: vertical;
+  background: var(--surface);
+}
 .outline-section textarea:focus,
-.upload-body textarea:focus {
+.upload-body textarea:focus,
+.draft-input:focus {
   outline: none;
   border-color: var(--nu-purple);
   box-shadow: 0 0 0 3px var(--nu-purple-tint-2);
+}
+.readability {
+  margin-top: 0.6rem;
+  font-size: 0.9rem;
+  color: var(--text-muted, #555);
+}
+details.exemplar {
+  margin-top: 1.5rem;
+}
+details.exemplar > summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--nu-purple-dark);
+  font-size: 1rem;
+}
+details.exemplar > summary:hover {
+  color: var(--nu-purple);
+}
+details.exemplar[open] > summary {
+  margin-bottom: 0.75rem;
 }
 .workspace-actions {
   display: flex;
