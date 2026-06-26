@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { CaseSummary, OutlineSection, ScoreResponse } from "@dci/shared";
+import type { CaseSummary, ScoreResponse } from "@dci/shared";
 import { api, ApiError } from "../api";
 import { CaseSelector, type SelectedCase } from "./CaseSelector";
 import { DraftWorkspace } from "./DraftWorkspace";
@@ -15,23 +15,21 @@ const STEPS: { n: Step; label: string }[] = [
 
 export function PracticeFlow() {
   const [cases, setCases] = useState<CaseSummary[]>([]);
-  const [outline, setOutline] = useState<OutlineSection[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const [step, setStep] = useState<Step>(1);
   const [selected, setSelected] = useState<SelectedCase | null>(null);
-  const [draft, setDraft] = useState<Record<string, string>>({});
+  const [draft, setDraft] = useState<string>("");
   const [result, setResult] = useState<ScoreResponse | null>(null);
 
   useEffect(() => {
     let active = true;
     (async () => {
       try {
-        const [c, o] = await Promise.all([api.cases(), api.outline()]);
+        const c = await api.cases();
         if (!active) return;
         setCases(c);
-        setOutline(o.sections);
       } catch (err) {
         if (active) setLoadError(err instanceof ApiError ? err.message : "Failed to load the workspace.");
       } finally {
@@ -51,7 +49,7 @@ export function PracticeFlow() {
 
   function restart() {
     setSelected(null);
-    setDraft({});
+    setDraft("");
     setResult(null);
     setStep(1);
   }
@@ -78,7 +76,6 @@ export function PracticeFlow() {
       {!loading && !loadError && step === 2 && selected && (
         <DraftWorkspace
           selected={selected}
-          outline={outline}
           draft={draft}
           setDraft={setDraft}
           onBack={() => setStep(1)}

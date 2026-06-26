@@ -27,7 +27,8 @@ shared/  TS types shared by both (@dci/shared workspace)
 | `features.md` | Document spec. Server parses the `## Student Outline` `###` headers. |
 | `server/src/content.ts` | Parses the two `.md` files (with safe fallbacks). |
 | `server/src/scoring.ts` | OpenRouter call, zod validation + retry, score aggregation, bands. |
-| `server/src/cases.ts` | The 3 simulated discharge summaries. |
+| `server/src/readability.ts` | Deterministic Flesch–Kincaid reading-level computed server-side. |
+| `server/src/cases.ts` | The simulated discharge summaries (each optionally with `exemplar` + `scoringNotes`). |
 | `server/src/db.ts` | Postgres schema init, `saveSubmission`, `getStats`. |
 | `server/src/index.ts` | Express routes + static SPA serving. |
 | `client/src/components/PracticeFlow.tsx` | 3-step workflow orchestration. |
@@ -40,6 +41,19 @@ shared/  TS types shared by both (@dci/shared workspace)
 - Scores are computed server-side from per-criterion results; the LLM only scores criteria by `id`.
 - Bands are percent-based (Optimal ≥83%, Adequate ≥58%, else Inadequate) so they survive rubric edits.
 - Keep the parseable formats in `scoring.md`/`features.md` intact (table header row; `## Student Outline` + `### ` headers).
+- **Reading level is computed server-side** (`readability.ts`, Flesch–Kincaid) — never trust the LLM
+  for it. The number is shown to the student and fed into the prompt as authoritative for criterion 8.
+- **Students draft on a blank page** (single free-text box, no section prompts) — knowing which
+  sections to include is part of the assessment. The `## Student Outline` in `features.md` is now
+  LLM/faculty reference only, not shown to students (keep it parseable; it still feeds the prompt).
+- **Gold-standard `exemplar` security is intentionally light.** Each built-in case's exemplar is
+  withheld from `/cases` and returned only with the assessment, but it *does* reach the client in the
+  score response (a determined student could read it via devtools before opening the reveal panel).
+  This is an accepted trade-off: it's a low-stakes learning exercise storing **no identifiable
+  student content**, so a network round-trip to gate the reveal isn't warranted. If stakes ever rise
+  (graded, per-student accounts, anti-cheating needs), move the exemplar behind a separate
+  authenticated `GET /cases/:id/exemplar` endpoint fetched only on the assessment screen, or release
+  it server-side only after a submission for that case+session exists.
 
 ## Commands
 

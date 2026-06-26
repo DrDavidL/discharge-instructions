@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { Assessment, CategoryScore, CriterionScore, PerformanceBand } from "@dci/shared";
 import { env } from "./env";
 import { getContent } from "./content";
+import { computeReadability, gradeLabel } from "./readability";
 
 const llmSchema = z.object({
   criteria: z
@@ -27,7 +28,11 @@ interface ChatMessage {
   content: string;
 }
 
-function buildMessages(sourceSummary: string, draft: string): ChatMessage[] {
+function buildMessages(
+  sourceSummary: string,
+  draft: string,
+  opts: { exemplar?: string | null; scoringNotes?: string | null; readingGradeNote?: string } = {},
+): ChatMessage[] {
   const { criteria, rubricRaw, featuresRaw } = getContent();
   const criteriaList = criteria
     .map((c) => `- id ${c.id} [${c.category}] ${c.criterion} (max ${c.maxScore})`)
@@ -37,6 +42,8 @@ function buildMessages(sourceSummary: string, draft: string): ChatMessage[] {
     "You are an expert clinical educator at Northwestern University Feinberg School of Medicine. " +
     "You evaluate patient-facing discharge instructions written by medical students against the rubric provided. " +
     "Be rigorous, specific, fair, and constructive, and always ground your rationale in the student's actual text. " +
+    "Students are given a blank page (no section prompts), so part of the assessment is whether they " +
+    "included the right sections themselves. " +
     "Output a single JSON object and nothing else.";
 
   const user = [
@@ -52,6 +59,29 @@ function buildMessages(sourceSummary: string, draft: string): ChatMessage[] {
     "# SOURCE — Discharge summary the student worked from (the clinical record)",
     sourceSummary,
     "",
+    ...(opts.exemplar?.trim()
+      ? [
+          "# REFERENCE — One gold-standard example for this case",
+          "This is ONE acceptable answer, not the only one. Many valid variations exist (different",
+          "wording, dosing within reason, clinic names/times). Use it to calibrate, not as an answer key.",
+          opts.exemplar.trim(),
+          "",
+        ]
+      : []),
+    ...(opts.scoringNotes?.trim()
+      ? [
+          "# FACULTY GRADING NOTES for this case (acceptable variations — apply these)",
+          opts.scoringNotes.trim(),
+          "",
+        ]
+      : []),
+    ...(opts.readingGradeNote
+      ? [
+          "# Computed reading level (authoritative — use this for the Reading Level criterion)",
+          opts.readingGradeNote,
+          "",
+        ]
+      : []),
     "# STUDENT SUBMISSION — Discharge instructions to evaluate",
     draft.trim() ? draft : "(the student left the draft blank)",
     "",
@@ -127,9 +157,22 @@ function extractJson(text: string): unknown {
 export async function scoreSubmission(input: {
   sourceSummary: string;
   draft: string;
+  exemplar?: string | null;
+  scoringNotes?: string | null;
 }): Promise<{ assessment: Assessment; model: string }> {
   const { criteria, categoryOrder, categoryMax } = getContent();
-  const messages = buildMessages(input.sourceSummary, input.draft);
+  const readability = computeReadability(input.draft);
+  const readingGradeNote = readability
+    ? `Flesch–Kincaid grade level: ${readability.fleschKincaidGrade} (${gradeLabel(
+        readability.fleschKincaidGrade,
+      )}); Flesch reading ease: ${readability.fleschReadingEase}/100. ` +
+      "Target for patient instructions is roughly a 6th–7th grade level."
+    : undefined;
+  const messages = buildMessages(input.sourceSummary, input.draft, {
+    exemplar: input.exemplar,
+    scoringNotes: input.scoringNotes,
+    readingGradeNote,
+  });
 
   let parsed: z.infer<typeof llmSchema>;
   try {
@@ -184,6 +227,7 @@ export async function scoreSubmission(input: {
     criteria: scored,
     topPriorities: parsed.topPriorities.map((s) => s.trim()).filter(Boolean),
     safetyFlags: parsed.safetyFlags.map((s) => s.trim()).filter(Boolean),
+    readability,
   };
 
   return { assessment, model: env.openRouter.model };

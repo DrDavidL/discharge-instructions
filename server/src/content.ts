@@ -38,9 +38,8 @@ const DEFAULT_CRITERIA: RubricCriterion[] = [
   { id: 7, category: "Contingency Planning & Follow-Up", criterion: "Follow-Up Care", maxScore: 2 },
   { id: 8, category: "Readability, Formatting & Language", criterion: "Reading Level & Plain Language", maxScore: 2 },
   { id: 9, category: "Readability, Formatting & Language", criterion: "Organization & Formatting", maxScore: 2 },
-  { id: 10, category: "Readability, Formatting & Language", criterion: "Language Access", maxScore: 2 },
-  { id: 11, category: "Communication & Patient Engagement", criterion: "Patient-Centeredness & Teach-Back", maxScore: 2 },
-  { id: 12, category: "Accuracy & Safety", criterion: "Accuracy & Consistency with the Record", maxScore: 2 },
+  { id: 10, category: "Communication & Patient Engagement", criterion: "Patient-Centeredness", maxScore: 2 },
+  { id: 11, category: "Accuracy & Safety", criterion: "Accuracy & Consistency with the Record", maxScore: 2 },
 ];
 
 function slug(s: string): string {

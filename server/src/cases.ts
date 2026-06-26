@@ -1,5 +1,16 @@
 import type { CaseSummary } from "@dci/shared";
 
+/**
+ * Server-side case definition. Extends the client-facing summary with faculty-only fields:
+ * - `exemplar`: a gold-standard example, revealed to the student after assessment and used
+ *   to calibrate the scoring model. Withheld from `/cases` so students can't pre-read it.
+ * - `scoringNotes`: case-specific grading guidance sent to the scoring model only.
+ */
+export interface CaseDef extends CaseSummary {
+  exemplar?: string;
+  scoringNotes?: string;
+}
+
 // All cases are fully SIMULATED. No real patient information. The content is intentionally
 // rich enough to support writing complete patient discharge instructions.
 
@@ -89,7 +100,6 @@ const DKA = `> **⚠️ SIMULATED CASE — NOT A REAL PATIENT.** For educational
 **Patient:** Maya T. (simulated) · **MRN:** SIM-100002 · **Age/Sex:** 19 F
 **Admitted:** Day 0 · **Discharged:** Day 4
 **Attending:** Dr. L. Hassan, Endocrinology · **Service:** Internal Medicine / Endocrinology
-**Preferred language:** Spanish (patient bilingual; mother prefers Spanish).
 
 ## Admitting Diagnosis
 Diabetic ketoacidosis.
@@ -231,7 +241,111 @@ small open area at inferior incision packed daily.
 ## Code Status
 Full code.`;
 
-export const CASES: CaseSummary[] = [
+const PYLORIC_STENOSIS = `> **⚠️ SIMULATED CASE — NOT A REAL PATIENT.** For educational use only.
+
+# Discharge Summary
+
+**Patient:** Steven M. (simulated) · **MRN:** SIM-100004 · **Age/Sex:** 6 weeks, M
+**Admitted:** Day 0 · **Discharged:** Day 2
+**Attending:** Dr. R. Cho, Pediatric Surgery · **Service:** Pediatrics / Pediatric Surgery
+
+## Admitting Diagnosis
+Hypertrophic pyloric stenosis with dehydration and electrolyte abnormalities.
+
+## History of Present Illness
+6-week-old previously healthy male, exclusively breastfed, brought to the ED by his parents
+for one day of progressive, forceful (non-bilious) vomiting and inability to keep breastmilk
+down. Decreased wet diapers over the prior 24 hours. No fever, no bloody stools.
+
+## Hospital Course
+Exam and labs were consistent with dehydration and a hypochloremic, hypokalemic metabolic
+alkalosis. He was resuscitated with IV fluids and electrolyte repletion. Abdominal ultrasound
+confirmed hypertrophic pyloric stenosis. After correction of his fluid/electrolyte status he
+underwent an uncomplicated **laparoscopic pyloromyotomy** and tolerated the procedure well.
+Feeds were advanced postoperatively without recurrent vomiting.
+
+## Condition at Discharge
+Well-appearing, afebrile, well-hydrated, tolerating breastfeeding. Voiding normally.
+
+## Procedures
+Laparoscopic pyloromyotomy (Day 1). Three small laparoscopic incisions closed with
+absorbable sutures and Steri-Strips.
+
+## Medications at Discharge
+- No new daily medications.
+- May use **Infants' acetaminophen (Tylenol)** 2 mL by mouth, no more often than every 6 hours,
+  as needed for signs of pain.
+
+## Activity, Diet & Wound Care
+- Resume breastfeeding on demand; small, frequent feeds initially; hold upright during and for
+  20–30 minutes after feeds.
+- Sponge baths only for the first week; keep incisions clean and dry, pat (do not rub).
+- Let the Steri-Strips fall off on their own.
+
+## Pending Items
+None pending. Electrolytes normalized prior to discharge.
+
+## Follow-Up
+- Pediatrics Clinic on 9/1 at 10:00 AM — phone 312-222-2222.
+- Pediatric Surgery Clinic on 9/8 at 11:00 AM — phone 312-333-3333.
+
+## Code Status
+Full code.`;
+
+const PYLORIC_STENOSIS_EXEMPLAR = `**Why you were in the hospital**
+
+Steven was admitted to the hospital for vomiting and dehydration. He was diagnosed with
+pyloric stenosis. This means the muscle between his stomach and intestines was too tight, so
+milk could not pass through. He had surgery to open up the tight muscle (called a pyloromyotomy).
+
+**Your medicines**
+
+No new medicines were prescribed. For mild signs of pain you can use Infants' Tylenol
+(acetaminophen): 2 mL, at most every 6 hours. If he continues to show signs of pain, contact
+his pediatrician.
+
+**Feeding**
+
+Steven is ready to resume breastfeeding. You can feed him whenever he shows signs of being
+hungry. Small, more frequent feeds may be easier for him to tolerate at first. Hold him upright
+during feeds and for 20–30 minutes afterward.
+
+**Surgical site care**
+
+For the first week, give sponge baths to avoid soaking the surgical sites under water. You can
+gently wash the surgical sites with warm water, then pat them dry (instead of rubbing). Let the
+tape strips on the surgical sites fall off on their own (don't pull them off).
+
+**Warning signs and when to get help**
+
+Call the Pediatrics Clinic if: he is not feeding well; he has fewer wet diapers than normal; you
+have general questions; or he shows signs of pain that aren't getting better with Tylenol.
+
+Return to the Emergency Room if: he has a fever; he is not feeding at all; he is vomiting again;
+he is weak or not waking up; or the surgical sites have worsening redness, warmth, swelling, pus
+drainage, or bleeding.
+
+**Your follow-up appointments**
+
+- Follow up in the Pediatrics Clinic on 9/1 at 10:00 AM.
+- Follow up in the Surgery Clinic on 9/8 at 11:00 AM.
+
+**Who to call**
+
+- Pediatrics Clinic: 312-222-2222 (for general questions)
+- Surgery Clinic: 312-333-3333 (for questions about the surgery)`;
+
+const PYLORIC_STENOSIS_NOTES = `It is acceptable if students do not list any pain medication. If they do list a pain medication,
+it should be acetaminophen / Tylenol in liquid form. The exact dose may vary, but it should be a
+specific dose in mL (not mg/kg) with a frequency.
+For follow-up appointments, the exact clinic names and dates/times may vary, but students should
+list at least one specific follow-up appointment including a date, time, and clinic name.
+For contact information, the exact phone numbers may vary, but at least one clinic phone number
+should be listed.
+This is an infant; instructions are addressed to the parents/caregivers, so do not penalize the
+absence of a written teach-back request.`;
+
+export const CASES: CaseDef[] = [
   {
     id: "chf",
     title: "Acute Decompensated Heart Failure (with new AFib & AKI)",
@@ -241,7 +355,7 @@ export const CASES: CaseSummary[] = [
   {
     id: "dka",
     title: "New-Onset Type 1 Diabetes Presenting in DKA",
-    blurb: "19F, first-ever insulin regimen, glucose monitoring, sick-day rules, and urgent endocrine follow-up. Spanish language preference noted.",
+    blurb: "19F, first-ever insulin regimen, glucose monitoring, sick-day rules, and urgent endocrine follow-up.",
     content: DKA,
   },
   {
@@ -250,8 +364,16 @@ export const CASES: CaseSummary[] = [
     blurb: "58M post-op with a new colostomy, wound infection and packing, opioid + antibiotic course, VTE prophylaxis, and activity restrictions.",
     content: COLECTOMY,
   },
+  {
+    id: "pyloric",
+    title: "Infant Pyloric Stenosis — Laparoscopic Pyloromyotomy",
+    blurb: "6-week-old with forceful vomiting and dehydration, treated with a pyloromyotomy. Caregiver-facing instructions: feeding, incision care, and infant red flags.",
+    content: PYLORIC_STENOSIS,
+    exemplar: PYLORIC_STENOSIS_EXEMPLAR,
+    scoringNotes: PYLORIC_STENOSIS_NOTES,
+  },
 ];
 
-export function findCase(id: string): CaseSummary | undefined {
+export function findCase(id: string): CaseDef | undefined {
   return CASES.find((c) => c.id === id);
 }

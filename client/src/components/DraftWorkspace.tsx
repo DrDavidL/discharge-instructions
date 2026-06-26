@@ -1,27 +1,22 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
-import type { OutlineSection, ScoreResponse } from "@dci/shared";
+import type { ScoreResponse } from "@dci/shared";
 import { api, ApiError } from "../api";
 import { CaseViewer } from "./CaseViewer";
 import type { SelectedCase } from "./CaseSelector";
 
 interface Props {
   selected: SelectedCase;
-  outline: OutlineSection[];
-  draft: Record<string, string>;
-  setDraft: Dispatch<SetStateAction<Record<string, string>>>;
+  draft: string;
+  setDraft: Dispatch<SetStateAction<string>>;
   onBack: () => void;
   onAssessed: (result: ScoreResponse) => void;
 }
 
-export function DraftWorkspace({ selected, outline, draft, setDraft, onBack, onAssessed }: Props) {
+export function DraftWorkspace({ selected, draft, setDraft, onBack, onAssessed }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const filledCount = outline.filter((s) => (draft[s.key] ?? "").trim()).length;
-
-  function assembleDraft(): string {
-    return outline.map((s) => `## ${s.title}\n${(draft[s.key] ?? "").trim()}`).join("\n\n");
-  }
+  const wordCount = draft.trim() ? draft.trim().split(/\s+/).length : 0;
 
   async function submit() {
     setError(null);
@@ -32,7 +27,7 @@ export function DraftWorkspace({ selected, outline, draft, setDraft, onBack, onA
         caseTitle: selected.title,
         sourceSummary: selected.content,
         sourceIsUploaded: selected.isUploaded,
-        draft: assembleDraft(),
+        draft,
       });
       onAssessed(res);
     } catch (err) {
@@ -47,8 +42,9 @@ export function DraftWorkspace({ selected, outline, draft, setDraft, onBack, onA
       <div className="section-intro">
         <h2>Step 2 · Draft your discharge instructions</h2>
         <p>
-          The discharge summary is on the left. Complete each section on the right in plain,
-          patient-friendly language.
+          The discharge summary is on the left. Write the complete patient-facing discharge
+          instructions on the right, in plain, patient-friendly language. There are no section
+          prompts — deciding what to include is part of the exercise.
         </p>
       </div>
 
@@ -59,19 +55,13 @@ export function DraftWorkspace({ selected, outline, draft, setDraft, onBack, onA
         </div>
         <div className="split-right">
           <div className="panel-label">Your discharge instructions</div>
-          <div className="outline-editor">
-            {outline.map((s) => (
-              <div className="outline-section" key={s.key}>
-                <label htmlFor={`sec-${s.key}`}>{s.title}</label>
-                <textarea
-                  id={`sec-${s.key}`}
-                  value={draft[s.key] ?? ""}
-                  onChange={(e) => setDraft((d) => ({ ...d, [s.key]: e.target.value }))}
-                  rows={4}
-                />
-              </div>
-            ))}
-          </div>
+          <textarea
+            className="draft-input"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder="Write the discharge instructions you would hand to this patient…"
+            rows={24}
+          />
         </div>
       </div>
 
@@ -83,9 +73,9 @@ export function DraftWorkspace({ selected, outline, draft, setDraft, onBack, onA
         </button>
         <div className="spacer" />
         <span className="muted">
-          {filledCount}/{outline.length} sections written
+          {wordCount} {wordCount === 1 ? "word" : "words"}
         </span>
-        <button className="btn btn-primary" onClick={submit} disabled={submitting || filledCount === 0}>
+        <button className="btn btn-primary" onClick={submit} disabled={submitting || wordCount === 0}>
           {submitting ? "Assessing…" : "Submit for assessment"}
         </button>
       </div>

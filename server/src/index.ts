@@ -48,8 +48,10 @@ api.get("/outline", requireAuth, (_req, res) => {
 });
 
 // ---- Sample cases ----
+// The gold-standard exemplar is withheld here so students can't read it before drafting;
+// it is returned only with the assessment (see /score).
 api.get("/cases", requireAuth, (_req, res) => {
-  res.json(CASES);
+  res.json(CASES.map(({ exemplar: _exemplar, ...summary }) => summary));
 });
 
 // ---- Score ----
@@ -80,6 +82,8 @@ api.post("/score", requireAuth, async (req, res) => {
   const sample = input.sourceIsUploaded ? undefined : findCase(input.caseId);
   const sourceSummary = sample?.content ?? input.sourceSummary;
   const caseTitle = sample?.title ?? input.caseTitle ?? "Uploaded case";
+  const exemplar = sample?.exemplar ?? null;
+  const scoringNotes = sample?.scoringNotes ?? null;
 
   if (!sourceSummary.trim()) {
     res.status(400).json({ error: "No source discharge summary was provided." });
@@ -88,7 +92,7 @@ api.post("/score", requireAuth, async (req, res) => {
 
   let result;
   try {
-    result = await scoreSubmission({ sourceSummary, draft: input.draft });
+    result = await scoreSubmission({ sourceSummary, draft: input.draft, exemplar, scoringNotes });
   } catch (err) {
     console.error("[score] scoring failed:", err);
     res.status(502).json({ error: (err as Error).message || "Scoring failed. Please try again." });
@@ -122,6 +126,7 @@ api.post("/score", requireAuth, async (req, res) => {
     persisted,
     model: result.model,
     assessment: result.assessment,
+    exemplar,
   };
   res.json(body);
 });
