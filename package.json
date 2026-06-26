@@ -19,12 +19,18 @@
     "build": "npm run build --workspace client",
     "start": "npm run start --workspace server",
     "typecheck": "npm run typecheck --workspace client && npm run typecheck --workspace server",
+    "lint": "eslint .",
     "scan:hidden": "node scripts/scan-hidden-chars.mjs",
     "audit": "npm audit --audit-level=high",
-    "verify": "npm run typecheck && npm run build && npm run scan:hidden && npm run audit"
+    "verify": "npm run lint && npm run typecheck && npm run build && npm run scan:hidden && npm run audit"
   },
   "devDependencies": {
-    "concurrently": "^9.1.2"
+    "@eslint/js": "^10.0.1",
+    "concurrently": "^9.1.2",
+    "eslint": "^10.6.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.7.0",
+    "typescript-eslint": "^8.62.0"
   },
   "overrides": {
     "shell-quote": "^1.8.4"

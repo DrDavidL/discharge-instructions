@@ -24,6 +24,9 @@ jobs:
       - name: Install (clean, from lockfile)
         run: npm ci
 
+      - name: Lint (ESLint)
+        run: npm run lint
+
       - name: Typecheck (client + server)
         run: npm run typecheck
 

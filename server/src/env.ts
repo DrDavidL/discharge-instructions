@@ -45,6 +45,9 @@ export const env = {
     baseUrl: optional("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1"),
     siteUrl: optional("OPENROUTER_SITE_URL"),
     appName: optional("OPENROUTER_APP_NAME", "Discharge Instructions Coach"),
+    // Abort a scoring call that stalls, so it returns a clear error instead of hanging
+    // until the platform edge proxy gives up with a bodyless 502. Default 90s.
+    timeoutMs: Number(optional("OPENROUTER_TIMEOUT_MS", "90000")),
   },
   auth: {
     password: appPassword,
