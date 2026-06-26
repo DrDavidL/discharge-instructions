@@ -69,7 +69,9 @@ npm start            # production: server serves client/dist + /api (run build f
 
 `OPENROUTER_API_KEY`, `MODEL` (default `anthropic/claude-sonnet-4.6`), `APP_PASSWORD`,
 `AUTH_SECRET`, `DATABASE_URL` (Railway-provided), optional `DATABASE_SSL`, `PORT`,
-`OPENROUTER_SITE_URL`, `OPENROUTER_APP_NAME`. See `.env.example`.
+`OPENROUTER_SITE_URL`, `OPENROUTER_APP_NAME`, `OPENROUTER_TIMEOUT_MS` (default 90s — the
+scoring fetch aborts on stall so it returns a JSON error instead of a bodyless gateway 502).
+See `.env.example`.
 
 ## Update checklist
 

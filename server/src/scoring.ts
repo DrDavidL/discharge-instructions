@@ -20,6 +20,7 @@ const llmSchema = z.object({
   safetyFlags: z.array(z.string()).default([]),
 });
 
+// eslint-disable-next-line no-control-regex -- intentionally strips all non-ASCII (incl. control) chars from header values
 const ascii = (s: string): string => s.replace(/[^\x00-\x7F]/g, "");
 const round1 = (n: number): number => Math.round(n * 10) / 10;
 
@@ -108,6 +109,10 @@ async function callOpenRouter(messages: ChatMessage[]): Promise<string> {
   if (env.openRouter.siteUrl) headers["HTTP-Referer"] = ascii(env.openRouter.siteUrl);
   if (env.openRouter.appName) headers["X-Title"] = ascii(env.openRouter.appName);
 
+  const timeoutMs = env.openRouter.timeoutMs;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
   let resp: Response;
   try {
     resp = await fetch(`${env.openRouter.baseUrl}/chat/completions`, {
@@ -120,15 +125,27 @@ async function callOpenRouter(messages: ChatMessage[]): Promise<string> {
         max_tokens: 4000,
         response_format: { type: "json_object" },
       }),
+      signal: controller.signal,
     });
   } catch (err) {
     const e = err as { name?: string; message?: string; cause?: unknown };
+    if (e?.name === "AbortError") {
+      console.error(`[openrouter] request aborted after ${timeoutMs}ms (timeout).`);
+      throw new Error(
+        `The scoring service took too long to respond (over ${Math.round(timeoutMs / 1000)}s) and timed out. Please try again.`,
+        { cause: err },
+      );
+    }
     console.error("[openrouter] fetch failed:", {
       name: e?.name,
       message: e?.message,
       cause: e?.cause ? String(e.cause) : null,
     });
-    throw new Error("Could not reach the scoring service. Check OPENROUTER_API_KEY and network.");
+    throw new Error("Could not reach the scoring service. Check OPENROUTER_API_KEY and network.", {
+      cause: err,
+    });
+  } finally {
+    clearTimeout(timer);
   }
 
   if (!resp.ok) {

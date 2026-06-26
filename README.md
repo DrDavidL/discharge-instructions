@@ -76,6 +76,8 @@ Other scripts: `npm run typecheck`, `npm run build`, `npm start` (production: se
 
 `.github/workflows/ci.yml` runs on every push to `main` and every pull request:
 
+- **Lint** — `eslint .` (flat config in `eslint.config.js`): TypeScript rules everywhere, plus
+  React Hooks rules for the client.
 - **Typecheck** — `tsc --noEmit` across both workspaces.
 - **Build** — the production client build must succeed.
 - **Hidden-character scan** — `scripts/scan-hidden-chars.mjs` rejects trojan-source Unicode
@@ -86,8 +88,7 @@ Other scripts: `npm run typecheck`, `npm run build`, `npm start` (production: se
   advisories.
 - **Secret scan** — `gitleaks` scans the full history for leaked keys, tokens, and passwords.
 
-Run the non-secret gates locally with `npm run verify`. *(ESLint is not yet wired up; `tsc`
-serves as the static-analysis gate for now — adding ESLint is a tracked follow-up.)*
+Run the non-secret gates locally with `npm run verify`.
 
 ## Environment variables
 
@@ -102,6 +103,7 @@ serves as the static-analysis gate for now — adding ESLint is a tracked follow
 | `PORT` | no | Defaults to 8080; Railway sets this automatically. |
 | `OPENROUTER_SITE_URL` | no | Sent as `HTTP-Referer` to OpenRouter (attribution). |
 | `OPENROUTER_APP_NAME` | no | Sent as `X-Title` to OpenRouter (attribution). |
+| `OPENROUTER_TIMEOUT_MS` | no | Abort a stalled scoring call after this many ms (default `90000`). Prevents a hung request from ending in a bodyless gateway 502. |
 
 `.env` is git-ignored. **Never commit secrets.**
 
