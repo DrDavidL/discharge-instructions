@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Typecheck, build & scans
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20" # matches the Railway deploy (railpack pins Node 20); 20.19+ satisfies Vite 8
+          cache: npm
+
+      - name: Install (clean, from lockfile)
+        run: npm ci
+
+      - name: Typecheck (client + server)
+        run: npm run typecheck
+
+      - name: Build client
+        run: npm run build
+
+      - name: Hidden-character scan (trojan-source guard)
+        run: npm run scan:hidden
+
+      - name: Large-file guard (block >5 MB tracked files)
+        run: |
+          big=$(git ls-files | xargs -I{} find {} -type f -size +5M 2>/dev/null || true)
+          if [ -n "$big" ]; then
+            echo "::error::Tracked files larger than 5 MB are not allowed:"; echo "$big"; exit 1
+          fi
+          echo "✓ No oversized tracked files."
+
+      - name: Dependency audit (fail on high/critical)
+        run: npm audit --audit-level=high
+
+  secrets:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history so gitleaks can scan all commits
+
+      - name: Run gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

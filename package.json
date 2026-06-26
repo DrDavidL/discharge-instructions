@@ -18,7 +18,10 @@
     "dev:server": "npm run dev --workspace server",
     "build": "npm run build --workspace client",
     "start": "npm run start --workspace server",
-    "typecheck": "npm run typecheck --workspace client && npm run typecheck --workspace server"
+    "typecheck": "npm run typecheck --workspace client && npm run typecheck --workspace server",
+    "scan:hidden": "node scripts/scan-hidden-chars.mjs",
+    "audit": "npm audit --audit-level=high",
+    "verify": "npm run typecheck && npm run build && npm run scan:hidden && npm run audit"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"
