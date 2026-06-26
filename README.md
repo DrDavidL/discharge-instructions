@@ -68,7 +68,26 @@ npm run dev               # client at http://localhost:5173, API at :8080
 is **optional** locally — without `DATABASE_URL` the app works but won't persist submissions.
 
 Other scripts: `npm run typecheck`, `npm run build`, `npm start` (production: serves
-`client/dist` + API from the Express server — run `npm run build` first).
+`client/dist` + API from the Express server — run `npm run build` first), and
+`npm run verify` (runs the full local gate: typecheck → build → hidden-character scan →
+`npm audit`).
+
+## Continuous integration & quality gates
+
+`.github/workflows/ci.yml` runs on every push to `main` and every pull request:
+
+- **Typecheck** — `tsc --noEmit` across both workspaces.
+- **Build** — the production client build must succeed.
+- **Hidden-character scan** — `scripts/scan-hidden-chars.mjs` rejects trojan-source Unicode
+  (bidirectional overrides, zero-width characters, stray BOM) in any tracked text file.
+- **Large-file guard** — blocks any tracked file over 5 MB (binary assets like the faculty
+  `.docx` templates are git-ignored and never committed).
+- **Dependency audit** — `npm audit --audit-level=high` fails the build on high/critical
+  advisories.
+- **Secret scan** — `gitleaks` scans the full history for leaked keys, tokens, and passwords.
+
+Run the non-secret gates locally with `npm run verify`. *(ESLint is not yet wired up; `tsc`
+serves as the static-analysis gate for now — adding ESLint is a tracked follow-up.)*
 
 ## Environment variables
 
